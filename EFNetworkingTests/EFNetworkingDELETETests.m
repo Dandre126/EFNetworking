@@ -46,14 +46,14 @@
         request.HTTPMethod = EFNHTTPMethodDELETE;
         request.parameters = @{@"id": @(100)};
     }
-                              progress:^(NSProgress * _Nullable progress) {
-                                  NSLog(@"progress:%@", progress);
+                              progress:^(NSProgress * _Nonnull progress) {
+                                  EFNLog(@"progress:%@", progress);
                               }
-                               success:^(EFNResponse * _Nullable response) {
-                                   NSLog(@"responseObject:%@",response.dataObject);
+                               success:^(EFNResponse * _Nonnull response) {
+                                   EFNLog(@"responseObject:%@",response.dataObject);
                                }
-                               failure:^(EFNResponse * _Nullable response) {
-                                   NSLog(@"error:%@", response.message);
+                               failure:^(EFNResponse * _Nonnull response) {
+                                   EFNLog(@"error:%@", response.message);
                                }];
 }
 

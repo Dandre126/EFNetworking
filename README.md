@@ -1,10 +1,10 @@
 <p align="center" >
-  <img src="https://raw.githubusercontent.com/DandreYang/EFNetworking/master/EFNetworking/Demo/Sources/EFNetworking-title.png" height="200" alt="EFNetworking" title="EFNetworking"/>
+  <img src="./EFNetworking/Demo/Sources/EFNetworking-title.png" height="200" alt="EFNetworking" title="EFNetworking"/>
 </p>
 
-[![CI Status](http://img.shields.io/travis/Dandre126/EFNetworking.svg?style=flat)](https://travis-ci.org/Dandre126/EFNetworking)
+[![Build Status](https://travis-ci.org/DandreYang/EFNetworking.svg?branch=master)](https://travis-ci.org/DandreYang/EFNetworking)
 [![Version](https://img.shields.io/cocoapods/v/EFNetworking.svg?style=flat)](http://cocoapods.org/pods/EFNetworking)
-[![License](https://img.shields.io/cocoapods/l/EFNetworking.svg?style=flat)](http://cocoapods.org/pods/EFNetworking)
+[![License MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://raw.githubusercontent.com/DandreYang/EFNetworking/master/LICENSE)
 [![Platform](https://img.shields.io/cocoapods/p/EFNetworking.svg?style=flat)](http://cocoapods.org/pods/EFNetworking)
 ## 
 iOS网络层组件，支持POST/GET/PUT/DELETE等网络请求和上传下载及断点续传功能，自带网络缓存处理机制、灵活设置接口签名、自定义HEADER和公共参数等功能
@@ -64,17 +64,14 @@ pod 'EFNetworking'
     config.generalHeaders = @{@"HeaderKey":@"HeaderValue"};
     // 设置通用参数
     config.generalParameters = @{@"generalParameterKey":@"generalParameterValue"};
+    // 设置全局支持请求的数据类型
+    config.generalRequestSerializerType = EFNRequestSerializerTypeJSON;
     // 设置全局支持响应的数据类型
-    config.generalResponseSerializerTypes = [NSSet setWithObjects:
-                                             @"application/json",
-                                             @"text/xml",
-                                             @"text/html",
-                                             @"text/plain",
-                                             nil];
+    config.generalResponseSerializerType = EFNResponseSerializerTypeJSON;
     
     // 这里设置的下载文件保存路径是对全局有效的，所以建议设置的路径是指定到文件夹而不是文件，否则后下载的文件会将之前下载的文件进行覆盖
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSString *documentsDirectory = paths.firstObject;
     
     NSString *path = [documentsDirectory stringByAppendingPathComponent:@"/General/Download"];
     config.generalDownloadSavePath = path;
@@ -147,8 +144,8 @@ NSLog(@"req:%@", req);
     request.requestType = EFNRequestTypeFormDataUpload;
    
     UIImage *image = [UIImage imageNamed:@"image1.png"];
-    NSData *pdfData = UIImagePNGRepresentation(image);
-    [request addFormDataWithName:@"image1" fileData:pdfData];
+    NSData *imgData = UIImagePNGRepresentation(image);
+    [request appendUploadDataWithFileData:imgData name:@"img1"];
 }
                         progress:^(NSProgress * _Nullable progress) {
                             NSLog(@"progress:%@",progress.localizedDescription);
@@ -180,14 +177,14 @@ NSLog(@"req:%@", req);
     // 如果这里没有做设置，会取全局配置的generalDownloadSavePath（文件夹），
     // 如果全局配置也没有设置generalDownloadSavePath，则会默认保存在APP的"Documents/EFNetworking/Download/"目录下
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSString *documentsDirectory = paths.firstObject;
 
     NSString *path = [documentsDirectory stringByAppendingPathComponent:@"/Demo/Download"];
     request.downloadSavePath = path;
 }
                         progress:^(NSProgress * _Nullable progress) {
                             // 需要注意的是，网络层内部已经做了处理，这里已经是在主线程了
-                            float unitCount = progress.completedUnitCount/progress.totalUnitCount;
+                            float unitCount = 1.0 * progress.completedUnitCount/progress.totalUnitCount;
                             NSLog(@"%@",[NSString stringWithFormat:@"已下载 %.0f%%",unitCount*100]);
                         }
                          success:^(EFNResponse * _Nullable response) {
@@ -201,4 +198,4 @@ NSLog(@"req:%@", req);
 
 ## License
 
-EFNetworking is released under the MIT license. See [LICENSE](https://github.com/DandreYang/EFNetworking/blob/master/LICENSE) for details.
+EFNetworking is released under the MIT license. See [LICENSE](./LICENSE) for details.

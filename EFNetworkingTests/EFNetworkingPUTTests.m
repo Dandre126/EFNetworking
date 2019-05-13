@@ -46,17 +46,17 @@
         request.HTTPMethod = EFNHTTPMethodPUT;     
         request.parameters = @{@"key": @"value"};
         request.headers = @{@"key": @"value"};
-        request.requestSerializerTypes = [NSSet setWithObjects:@"application/json",@"text/plain", nil];
-        request.responseSerializerTypes = [NSSet setWithObjects:@"application/json",@"application/xml", nil];
+        request.requestSerializerType = EFNRequestSerializerTypeHTTP;
+        request.responseSerializerType = EFNResponseSerializerTypeJSON;
     }
-                              progress:^(NSProgress * _Nullable progress) {
-                                  NSLog(@"progress:%@", progress);
+                              progress:^(NSProgress * _Nonnull progress) {
+                                  EFNLog(@"progress:%@", progress);
                               }
-                               success:^(EFNResponse * _Nullable response) {
-                                   NSLog(@"responseObject:%@",response.dataObject);
+                               success:^(EFNResponse * _Nonnull response) {
+                                   EFNLog(@"responseObject:%@",response.dataObject);
                                }
-                               failure:^(EFNResponse * _Nullable response) {
-                                   NSLog(@"error:%@", response.message);
+                               failure:^(EFNResponse * _Nonnull response) {
+                                   EFNLog(@"error:%@", response.message);
                                }];
 }
 

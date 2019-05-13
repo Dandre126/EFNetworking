@@ -10,6 +10,13 @@
 #import "NSString+EFNetworking.h"
 #import "NSDictionary+EFNetworking.h"
 #import "NSArray+EFNetworking.h"
+#if __has_include(<YYCache/YYCache.h>)
+#import <YYCache/YYCache.h>
+#elif __has_include(<YYWebImage/YYCache.h>)
+#import <YYWebImage/YYCache.h>
+#else
+#import "YYCache.h"
+#endif
 
 @interface EFNCacheHelper ()
 
@@ -42,11 +49,6 @@
         self.cache = [[YYCache alloc] initWithPath:path];
     }
     return self;
-}
-
-- (instancetype)initWithName:(NSString *)name
-{
-    return [self init];
 }
 
 - (void)saveResponse:(EFNResponse *)response forRequest:(EFNRequest * _Nonnull)request
@@ -124,7 +126,7 @@
 {
     // 缓存时使用异步，不阻碍主线程
     [self.cache setObject:object forKey:key withBlock:^{
-        NSLog(@"缓存数据成功");
+        EFNLog(@"缓存数据成功");
     }];
 }
 

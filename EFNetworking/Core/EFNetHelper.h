@@ -11,6 +11,8 @@
 #import "EFNetProxy.h"
 #import "EFNCacheHelper.h"
 
+FOUNDATION_EXPORT NSString * _Nonnull EFNetworkingDefaultDownloadDirectory(void);
+
 /**
  * 网络请求管理类
  *
@@ -24,16 +26,22 @@
 @property (nonatomic, strong, readonly, nonnull) EFNetProxy * netProxy;
 
 /**
- 网络缓存管理器
+ 网络缓存管理器 默认缓存储存在 Library/Cache/EFNetworking/目录下
  */
 @property (nonatomic, strong, readonly, nullable) EFNCacheHelper * cacheHelper;
 
 /**
- 全局配置代理, 默认会自动创建一个EFNDefaultConfig对象并赋值给config
+ 全局配置代理, 默认的config是EFNDefaultConfig的单例
  */
-@property (nonatomic, strong, nonnull) id <EFNGeneralConfigDelegate> config;
+@property (nonatomic, retain, nonnull) id <EFNGeneralConfigDelegate> config;
 
+/**
+ 是否正在请求数据
+ */
 @property (nonatomic, assign, readonly) BOOL isLoading;
+
+- (instancetype _Nonnull )init NS_UNAVAILABLE;
++ (instancetype _Nonnull )new NS_UNAVAILABLE;
 
 /**
  网络请求助手单例
@@ -54,7 +62,7 @@
 
  @param configHandler 配置回调
  */
-+ (void)generalConfigHandler:(void (^_Nonnull) (id <EFNGeneralConfigDelegate> _Nonnull config))configHandler;
++ (void)generalConfigHandler:(NS_NOESCAPE EFNGeneralConfigBlock _Nonnull )configHandler;
 
 /**
  使用数据请求对象发起请求，请求对象需要遵循协议<EFNRequestModelReformer>
@@ -63,7 +71,7 @@
  @param requestModel 请求模型，需要遵循EFNRequestModelReformer协议
  @param reformerConfig 数据转换代理
  @param progressBlock 进度回调
- @param responseBlock 响应回调，reformData为转化后的数据，如果reformerConfig返回的数据转换代理为nil，则reformData = response.responseObject；否则会根据数据转换代理方法“- reformData:”返回对应类型的对象，并且可通过reformData.isSuccess判断数据请求是成功还是失败。
+ @param responseBlock 响应回调，reformData为转化后的数据，如果reformerConfig返回的数据转换代理为nil，则reformData = response.dataObject；否则会根据数据转换代理方法“- reformData:”返回对应类型的对象，并且可通过reformData.isSuccess判断数据请求是成功还是失败。
  @return 请求任务编号
  @warning requestModel 不能为 nil
  */
@@ -80,7 +88,7 @@
  @param failureBlock 请求失败回调
  @return 请求任务ID
  */
-- (NSNumber *_Nullable)request:(EFNConfigRequestBlock _Nonnull)configRequestBlock
+- (NSNumber *_Nullable)request:(NS_NOESCAPE EFNConfigRequestBlock _Nonnull)configRequestBlock
                        success:(EFNCallBlock _Nullable )successBlock
                        failure:(EFNCallBlock _Nullable )failureBlock;
 
@@ -88,13 +96,13 @@
  发起请求，带进度
 
  @param configRequestBlock 请求配置回调
- @param rogressBlock 进度回调
+ @param progressBlock 进度回调
  @param successBlock 请求成功回调
  @param failureBlock 请求失败回调
  @return 请求任务ID
  */
-- (NSNumber *_Nullable)request:(EFNConfigRequestBlock _Nonnull)configRequestBlock
-                      progress:(EFNProgressBlock _Nullable)rogressBlock
+- (NSNumber *_Nullable)request:(NS_NOESCAPE EFNConfigRequestBlock _Nonnull)configRequestBlock
+                      progress:(EFNProgressBlock _Nullable)progressBlock
                        success:(EFNCallBlock _Nullable )successBlock
                        failure:(EFNCallBlock _Nullable )failureBlock;
 
@@ -180,7 +188,7 @@
 
 @end
 
-@interface EFNetHelper (Sign)
+@interface EFNetHelper (Deprecated)
 
 /**
  根据Request获取HTTPMethod
@@ -188,7 +196,7 @@
  @param request request
  @return HTTPMethod
  */
-+ (NSString *_Nonnull)getHTTPMethodWithRequest:(EFNRequest *_Nonnull)request;
++ (NSString *_Nonnull)getHTTPMethodWithRequest:(EFNRequest *_Nonnull)request EFNDeprecated("请直接使用request.HTTPMethod");
 
 /**
  根据Request获取ApiMethod
@@ -196,37 +204,12 @@
  @param request request
  @return ApiMethod
  */
-+ (NSString *_Nullable)getApiMethodWithRequest:(EFNRequest *_Nonnull)request;
++ (NSString *_Nullable)getApiMethodWithRequest:(EFNRequest *_Nonnull)request EFNDeprecated("未来版本可能会移除该方法");
 
 @end
 
 #pragma mark - 默认全局配置
 @interface EFNDefaultConfig :NSObject <EFNGeneralConfigDelegate>
-
-/**
- 全局服务器配置
- */
-@property (nonatomic, copy, nullable) NSString *generalServer;
-/**
- 全局通用参数配置
- */
-@property (nonatomic, strong, nullable) NSDictionary<NSString *, id> *generalParameters;
-/**
- 全局通用HEADER配置
- */
-@property (nonatomic, strong, nullable) NSDictionary<NSString *, NSString *> *generalHeaders;
-/**
- 全局通用下载保存路径, 只能是文件夹，否则会覆盖文件
- */
-@property (nonatomic, copy, nullable) NSString *generalDownloadSavePath;
-
-@property (nonatomic, strong, nullable) NSSet *generalRequestSerializerTypes;
-@property (nonatomic, strong, nullable) NSSet *generalResponseSerializerTypes;
-
-/**
- 签名服务代理 可以设置签名、认证等信息
- */
-@property (nonatomic, strong, nullable) id <EFNSignService> signService;
 
 /**
  默认配置单例
