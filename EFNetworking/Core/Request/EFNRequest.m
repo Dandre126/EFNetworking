@@ -139,7 +139,7 @@ static NSString * const EFNRequestLockName = @"vip.dandre.efnetworking.request.l
 
 - (void)addFormDataWithName:(NSString *_Nullable)name fileName:(NSString *_Nullable)fileName fileData:(NSData *_Nonnull)fileData
 {
-    [self appendUploadDataWithFileData:fileData name:name fileName:name mimeType:nil];
+    [self appendUploadDataWithFileData:fileData name:name fileName:fileName mimeType:nil];
 }
 
 - (void)addFormDataWithName:(NSString *_Nullable)name fileName:(NSString *_Nullable)fileName mimeType:(NSString *_Nullable)mimeType fileData:(NSData *_Nonnull)fileData

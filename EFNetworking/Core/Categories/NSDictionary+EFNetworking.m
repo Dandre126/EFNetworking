@@ -13,17 +13,17 @@
 
 - (NSString *)efn_toURLQuery
 {
-    __block NSMutableString *paramString = [NSMutableString string];
-    __block NSArray * allKeys = self.allKeys;
-    [self enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-        NSInteger i = [allKeys indexOfObject:key];
-        if (i == 0) {
+    NSMutableString *paramString = [NSMutableString string];
+    __block BOOL isFirst = YES;
+    [self enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull obj, BOOL * _Nonnull stop) {
+        if (isFirst) {
             [paramString appendFormat:@"?%@=%@", key, obj];
+            isFirst = NO;
         } else {
             [paramString appendFormat:@"&%@=%@", key, obj];
         }
     }];
-    
+
     return paramString;
 }
 

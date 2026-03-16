@@ -127,15 +127,16 @@ static NSURL * EFNDownloadTempPath(NSString * fileName) {
         _sessionManager = [AFHTTPSessionManager manager];
         _sessionManager.operationQueue.maxConcurrentOperationCount = 5;
         _sessionManager.completionQueue = netProxy_processing_queue();
+
+        // SSL 策略只在 sessionManager 初始化时配置一次
+        if (_enableHTTPS) {
+            AFSecurityPolicy *securityPolicy = [AFSecurityPolicy defaultPolicy];
+            securityPolicy.allowInvalidCertificates = _allowInvalidCertificates;
+            securityPolicy.validatesDomainName = _validatesDomainName;
+            _sessionManager.securityPolicy = securityPolicy;
+        }
     }
-    
-    if (_enableHTTPS) {
-        AFSecurityPolicy *securityPolicy = [AFSecurityPolicy defaultPolicy];
-        securityPolicy.allowInvalidCertificates = _allowInvalidCertificates;
-        securityPolicy.validatesDomainName = _validatesDomainName;
-        _sessionManager.securityPolicy = securityPolicy;
-    }
-    
+
     return _sessionManager;
 }
 #endif
@@ -565,13 +566,12 @@ static NSURL * EFNDownloadTempPath(NSString * fileName) {
         EFNLog(@"requestIDList is nil or requestIDList is empty");
         return;
     }
-    
+
+    Lock();
     for (NSNumber *requestID in requestIDList) {
-        Lock();
-        NSURLSessionTask *requestTask = self.dispatchPool[requestID];
-        [requestTask resume];
-        Unlock();
+        [self.dispatchPool[requestID] resume];
     }
+    Unlock();
 }
 
 #pragma mark - Suspend Methods
@@ -603,13 +603,12 @@ static NSURL * EFNDownloadTempPath(NSString * fileName) {
         EFNLog(@"requestIDList is nil or requestIDList is empty");
         return;
     }
-    
+
+    Lock();
     for (NSNumber *requestID in requestIDList) {
-        Lock();
-        NSURLSessionTask *requestTask = self.dispatchPool[requestID];
-        [requestTask suspend];
-        Unlock();
+        [self.dispatchPool[requestID] suspend];
     }
+    Unlock();
 }
 
 #pragma mark - Cancel Methods
@@ -649,20 +648,17 @@ static NSURL * EFNDownloadTempPath(NSString * fileName) {
         EFNLog(@"requestIDList is nil or requestIDList is empty");
         return;
     }
-    
+
+    Lock();
     for (NSNumber *requestID in requestIDList) {
-        Lock();
         NSURLSessionTask *task = self.dispatchPool[requestID];
         if ([task isKindOfClass:[NSURLSessionDownloadTask class]]) {
             [(NSURLSessionDownloadTask *)task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
             }];
-        }else{
+        } else {
             [task cancel];
         }
-        Unlock();
     }
-    
-    Lock();
     [self.dispatchPool removeObjectsForKeys:requestIDList];
     Unlock();
 }

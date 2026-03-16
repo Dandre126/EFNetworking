@@ -413,11 +413,7 @@ NSString * EFNetworkingDefaultDownloadDirectory(void) {
 
 - (BOOL)isLoading
 {
-    if (self.requestPool.count == 0) {
-        _isLoading = NO;
-    }
-    
-    return _isLoading;
+    return self.requestPool.count > 0;
 }
 
 @end
@@ -518,7 +514,7 @@ NSString * EFNetworkingDefaultDownloadDirectory(void) {
     if (!url) return @"";
 
     if (request.api.length) {
-        [url stringByAppendingPathComponent:request.api];
+        url = [url stringByAppendingPathComponent:request.api];
     }
     return [NSURL URLWithString:url].path;
 }

@@ -63,15 +63,10 @@
     }
     
     NSString * key = [self keyForRequest:request];
-    
-    [self setObject:response.dataObject forKey:key];
-    
-    if (request.enableCache) {
-        self.cache.diskCache.ageLimit = request.cacheTimeout;
-    }else{
-        self.cache.diskCache.ageLimit = 0;
-    }
-    
+
+    // 先设置缓存超时，再写入数据，避免写入两次
+    self.cache.diskCache.ageLimit = request.cacheTimeout;
+
     [self setObject:response.dataObject forKey:key];
 }
 
